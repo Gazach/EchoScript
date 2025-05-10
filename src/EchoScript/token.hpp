@@ -26,6 +26,7 @@ enum class TokenType
 	FUNCTION, 
 	RETURN,
 	PRINT, 
+	PRINTLN,
 	TRUE, 
 	FALSE,
 

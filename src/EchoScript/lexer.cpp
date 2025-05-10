@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 #include <cctype>
 #include <unordered_map>
-
+#include <stdexcept>
 
 Lexer::Lexer(const std::string& src) : source(src) {}
 
@@ -42,6 +42,7 @@ TokenType Lexer::checkKeyword(const std::string& word) {
         {"function", TokenType::FUNCTION},
         {"return", TokenType::RETURN},
         {"print", TokenType::PRINT},
+        {"println", TokenType::PRINTLN},
         {"true", TokenType::TRUE},
         {"false", TokenType::FALSE},
     };
@@ -108,6 +109,23 @@ void Lexer::scanToken() {
         }
         break;
     }
+}
+void Lexer::scanString() {
+    std::string value;
+    advance();  // Skip the opening quote
+
+    while (peek() != '"' && !isAtEnd()) {
+        value += peek();
+        advance();
+    }
+
+    if (isAtEnd()) {
+        throw std::runtime_error("Unterminated string.");
+    }
+
+    advance();  // Skip the closing quote
+
+    addToken(TokenType::STRING, value);
 }
 
 std::vector<Token> Lexer::tokenize() {

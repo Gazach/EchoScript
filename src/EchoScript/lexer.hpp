@@ -26,5 +26,5 @@ private:
     void string();
     bool match(char expected);
     TokenType checkKeyword(const std::string& word);
-
+    void scanString();
 };

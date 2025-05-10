@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <memory>
 #include <variant>
 #include <unordered_map>
 #include <iostream>
 #include <vector>
-
+#include "value.hpp"
 // Forward declaration
 struct Expression;
 struct Statement;
@@ -13,72 +13,106 @@ struct Statement;
 using ExprPtr = std::shared_ptr<Expression>;
 using StmtPtr = std::shared_ptr<Statement>;
 
+
 struct Expression {
     virtual ~Expression() = default;
-    virtual int evaluate(std::unordered_map<std::string, int>& env) = 0;
+    virtual Value evaluate(std::unordered_map<std::string, Value>& env) = 0;
 };
 
 struct Statement {
     virtual ~Statement() = default;
-    virtual void execute(std::unordered_map<std::string, int>& env) = 0;
+    virtual void execute(std::unordered_map<std::string, Value>& env) = 0;
 };
 
 struct VariableExpr : Expression {
     std::string name;
     VariableExpr(const std::string& name) : name(name) {}
-    int evaluate(std::unordered_map<std::string, int>& env) override {
-        if (env.find(name) != env.end()) return env[name];
-        throw std::runtime_error("Undefined variable: " + name);
+
+    Value evaluate(std::unordered_map<std::string, Value>& env) override {
+        if (env.find(name) == env.end())
+            throw std::runtime_error("Undefined variable: " + name);
+        return env[name];
     }
 };
+
 
 struct LiteralExpr : Expression {
     int value;
     LiteralExpr(int val) : value(val) {}
-    int evaluate(std::unordered_map<std::string, int>&) override {
-        return value;
+
+    Value evaluate(std::unordered_map<std::string, Value>&) override {
+        return Value(value);
     }
 };
 
 struct LetStmt : Statement {
     std::string name;
     ExprPtr value;
+
     LetStmt(const std::string& name, ExprPtr value) : name(name), value(value) {}
-    void execute(std::unordered_map<std::string, int>& env) override {
-        env[name] = value->evaluate(env);
+
+    void execute(std::unordered_map<std::string, Value>& env) override {
+        env[name] = value->evaluate(env); // ✅ Works: both are Value now
     }
 };
 
-struct PrintStmt : Statement {
-    ExprPtr expr;
-    PrintStmt(ExprPtr expr) : expr(expr) {}
-    void execute(std::unordered_map<std::string, int>& env) override {
-        std::cout << expr->evaluate(env) << std::endl;
+struct PrintStmt : public Statement {
+    ExprPtr value;
+
+    PrintStmt(ExprPtr value) : value(value) {}
+
+    void execute(std::unordered_map<std::string, Value>& env) override {
+        Value val = value->evaluate(env);
+        std::cout << val.toString();  // Print without newline
+    }
+};
+
+struct PrintlnStmt : public Statement {
+    ExprPtr value;
+
+    PrintlnStmt(ExprPtr value) : value(value) {}
+
+    void execute(std::unordered_map<std::string, Value>& env) override {
+        Value val = value->evaluate(env);
+        std::cout << val.toString() << std::endl;  // Print with newline
     }
 };
 
 struct BinaryExpr : Expression {
     ExprPtr left;
-    char op;
     ExprPtr right;
+    char op;
 
-    BinaryExpr(ExprPtr left, char op, ExprPtr right)
-        : left(left), op(op), right(right) {
-    }
+    BinaryExpr(ExprPtr l, char o, ExprPtr r) : left(l), op(o), right(r) {}
 
-    int evaluate(std::unordered_map<std::string, int>& env) override {
-        int lhs = left->evaluate(env);
-        int rhs = right->evaluate(env);
+    Value evaluate(std::unordered_map<std::string, Value>& env) override {
+        Value lhs = left->evaluate(env);
+        Value rhs = right->evaluate(env);
+
+        if (std::holds_alternative<std::string>(lhs.data) || std::holds_alternative<std::string>(rhs.data)) {
+            return Value(lhs.toString() + rhs.toString());
+        }
+
+        int l = lhs.asInt();
+        int r = rhs.asInt();
 
         switch (op) {
-        case '+': return lhs + rhs;
-        case '-': return lhs - rhs;
-        case '*': return lhs * rhs;
-        case '/':
-            if (rhs == 0) throw std::runtime_error("Division by zero.");
-            return lhs / rhs;
-        default:
-            throw std::runtime_error("Unknown binary operator.");
+        case '+': return Value(l + r);
+        case '-': return Value(l - r);
+        case '*': return Value(l * r);
+        case '/': return Value(l / r);
+        default: throw std::runtime_error("Unknown operator.");
         }
     }
 };
+
+
+struct StringExpr : Expression {
+    std::string value;
+    StringExpr(const std::string& val) : value(val) {}
+
+    Value evaluate(std::unordered_map<std::string, Value>&) override {
+        return Value(value);
+    }
+};
+

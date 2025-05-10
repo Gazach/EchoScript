@@ -37,6 +37,7 @@ void Parser::consume(TokenType type, const std::string& message) {
 StmtPtr Parser::statement() {
     if (match(TokenType::LET)) return letStatement();
     if (match(TokenType::PRINT)) return printStatement();
+    if (match(TokenType::PRINTLN)) return printlnStatement();
     throw std::runtime_error("Unknown statement");
 }
 
@@ -54,6 +55,14 @@ StmtPtr Parser::printStatement() {
     consume(TokenType::RIGHT_PAREN, "Expected ')'.");
     consume(TokenType::SEMICOLON, "Expected ';'.");
     return std::make_shared<PrintStmt>(value);
+}
+
+StmtPtr Parser::printlnStatement() {
+    consume(TokenType::LEFT_PAREN, "Expected '('.");
+    ExprPtr value = expression();
+    consume(TokenType::RIGHT_PAREN, "Expected ')'.");
+    consume(TokenType::SEMICOLON, "Expected ';'.");
+    return std::make_shared<PrintlnStmt>(value);
 }
 
 ExprPtr Parser::expression() {
@@ -86,6 +95,9 @@ ExprPtr Parser::factor() {
     if (match(TokenType::NUMBER)) {
         return std::make_shared<LiteralExpr>(std::stoi(token.lexeme));
     }
+    else if (match(TokenType::STRING)) {
+        return std::make_shared<StringExpr>(previous().lexeme);
+    }
     else if (match(TokenType::IDENTIFIER)) {
         return std::make_shared<VariableExpr>(token.lexeme);
     }
@@ -97,7 +109,6 @@ ExprPtr Parser::factor() {
 
     throw std::runtime_error("Invalid expression.");
 }
-
 
 std::vector<StmtPtr> Parser::parse() {
     std::vector<StmtPtr> stmts;

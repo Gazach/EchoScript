@@ -1,5 +1,6 @@
 ﻿#include "lexer.hpp"
 #include "parser.hpp"
+#include "value.hpp"
 #include "ast.hpp"
 #include <fstream>
 #include <sstream>
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]) {
     Parser parser(tokens);
     auto statements = parser.parse();
 
-    std::unordered_map<std::string, int> env;
+    std::unordered_map<std::string, Value> env;
 
     for (auto& stmt : statements) {
         stmt->execute(env);
