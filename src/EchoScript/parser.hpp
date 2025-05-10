@@ -19,8 +19,6 @@ private:
     const Token& consume(TokenType type, const std::string& message);
 
 
-    bool check(TokenType type);
-    std::vector<StmtPtr> block();
 
     // Statement parsing functions
     StmtPtr statement();
@@ -28,6 +26,7 @@ private:
     StmtPtr printStatement();
     StmtPtr printlnStatement();
     StmtPtr funcStatement();
+    StmtPtr returnStatement();
 
     // Expression parsing functions
     ExprPtr expression();

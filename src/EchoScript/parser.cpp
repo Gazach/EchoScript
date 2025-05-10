@@ -39,6 +39,7 @@ StmtPtr Parser::statement() {
     if (match(TokenType::PRINT)) return printStatement();
     if (match(TokenType::PRINTLN)) return printlnStatement();
     if (match(TokenType::FUNC)) return funcStatement();
+    if (match(TokenType::RETURN)) return returnStatement();
 
     // Fallback: try parsing as an expression statement
     ExprPtr expr = expression();  // or call your expression parser
@@ -137,6 +138,12 @@ StmtPtr Parser::funcStatement() {
     }
 
     return std::make_shared<FuncStmt>(name, body);
+}
+
+StmtPtr Parser::returnStatement() {
+    ExprPtr value = expression();
+    consume(TokenType::SEMICOLON, "Expected ';' after return value.");
+    return std::make_shared<ReturnStmt>(value);
 }
 
 

@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     auto statements = parser.parse();
 
     std::unordered_map<std::string, Value> env;
-    std::unordered_map<std::string, std::vector<StmtPtr>> funcs;
+    std::unordered_map<std::string, FuncStmt*> funcs;
 
 
     // Execute each statement
