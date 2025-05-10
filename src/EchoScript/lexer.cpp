@@ -90,6 +90,15 @@ void Lexer::scanToken() {
     case '/': addToken(TokenType::SLASH); break;
     case '=': addToken(TokenType::EQUAL); break;
     case '"': string(); break;
+    case '#':
+        if (match('#')) {
+            // Skip the comment until the end of line
+            while (peek() != '\n' && !isAtEnd()) advance();
+        }
+        else {
+            addToken(TokenType::UNKNOWN); // Or handle as syntax error
+        }
+        break;
     case ' ':
     case '\r':
     case '\t':
