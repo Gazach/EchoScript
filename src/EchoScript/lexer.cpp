@@ -39,7 +39,7 @@ void Lexer::addToken(TokenType type, const std::string& text) {
 TokenType Lexer::checkKeyword(const std::string& word) {
     static std::unordered_map<std::string, TokenType> keywords = {
         {"let", TokenType::LET},
-        {"function", TokenType::FUNCTION},
+        {"func", TokenType::FUNC},
         {"return", TokenType::RETURN},
         {"print", TokenType::PRINT},
         {"println", TokenType::PRINTLN},

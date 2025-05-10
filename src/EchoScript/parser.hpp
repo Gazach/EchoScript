@@ -16,14 +16,21 @@ private:
     const Token& advance();
     const Token& previous();
     bool match(TokenType type);
-    void consume(TokenType type, const std::string& error);
+    const Token& consume(TokenType type, const std::string& message);
 
+
+    bool check(TokenType type);
+    std::vector<StmtPtr> block();
+
+    // Statement parsing functions
     StmtPtr statement();
     StmtPtr letStatement();
     StmtPtr printStatement();
     StmtPtr printlnStatement();
+    StmtPtr funcStatement();
+
+    // Expression parsing functions
     ExprPtr expression();
     ExprPtr term();
     ExprPtr factor();
-
 };

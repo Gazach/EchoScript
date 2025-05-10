@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
+    // Tokenize and parse the source code
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
@@ -29,9 +30,18 @@ int main(int argc, char* argv[]) {
     auto statements = parser.parse();
 
     std::unordered_map<std::string, Value> env;
+    std::unordered_map<std::string, std::vector<StmtPtr>> funcs;
 
-    for (auto& stmt : statements) {
-        stmt->execute(env);
+
+    // Execute each statement
+    for (const auto& stmt : statements) {
+        try {
+            stmt->execute(env, funcs);  // Pass funcs to execute method
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Error during execution: " << e.what() << std::endl;
+            return 1;  // Stop execution on error
+        }
     }
 
     return 0;

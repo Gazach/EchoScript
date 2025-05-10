@@ -23,7 +23,7 @@ enum class TokenType
 
 	// Keywords
 	LET, 
-	FUNCTION, 
+	FUNC, 
 	RETURN,
 	PRINT, 
 	PRINTLN,

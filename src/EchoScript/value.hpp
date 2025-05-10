@@ -2,36 +2,31 @@
 #include <variant>
 #include <string>
 
-class Value {
-public:
-    std::variant<int, std::string> data;
+struct Value {
+    using ValueData = std::variant<int, std::string>;
 
-    // Default constructor
-    Value() : data(0) {}  // Default to int 0, or you could use an empty string: Value("") for a default string
+    ValueData data;
 
+    Value() : data(0) {}  // Default constructor (int)
     Value(int v) : data(v) {}
     Value(const std::string& v) : data(v) {}
 
-    std::string toString() const {
-        if (std::holds_alternative<int>(data)) {
-            return std::to_string(std::get<int>(data));
-        }
-        else {
-            return std::get<std::string>(data);
-        }
-    }
-
+    // Accessor functions
     int asInt() const {
         if (std::holds_alternative<int>(data)) {
             return std::get<int>(data);
         }
-        throw std::runtime_error("Expected int");
+        throw std::runtime_error("Value is not an integer");
     }
 
-    std::string asString() const {
+    std::string toString() const {
         if (std::holds_alternative<std::string>(data)) {
             return std::get<std::string>(data);
         }
-        throw std::runtime_error("Expected string");
+        return std::to_string(asInt()); // default to integer conversion
+    }
+
+    bool isInt() const {
+        return std::holds_alternative<int>(data);
     }
 };

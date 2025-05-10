@@ -28,18 +28,24 @@ bool Parser::match(TokenType type) {
     return false;
 }
 
-void Parser::consume(TokenType type, const std::string& message) {
+const Token& Parser::consume(TokenType type, const std::string& message) {
     if (peek().type != type)
         throw std::runtime_error("Parser error: " + message);
-    advance();
+    return advance();
 }
 
 StmtPtr Parser::statement() {
     if (match(TokenType::LET)) return letStatement();
     if (match(TokenType::PRINT)) return printStatement();
     if (match(TokenType::PRINTLN)) return printlnStatement();
-    throw std::runtime_error("Unknown statement");
+    if (match(TokenType::FUNC)) return funcStatement();
+
+    // Fallback: try parsing as an expression statement
+    ExprPtr expr = expression();  // or call your expression parser
+    consume(TokenType::SEMICOLON, "Expected ';' after expression.");
+    return std::make_shared<ExpressionStmt>(expr);
 }
+
 
 StmtPtr Parser::letStatement() {
     Token name = peek(); consume(TokenType::IDENTIFIER, "Expected variable name.");
@@ -90,16 +96,22 @@ ExprPtr Parser::term() {
 }
 
 ExprPtr Parser::factor() {
-    Token token = peek();
-
     if (match(TokenType::NUMBER)) {
-        return std::make_shared<LiteralExpr>(std::stoi(token.lexeme));
+        return std::make_shared<LiteralExpr>(std::stoi(previous().lexeme));
     }
     else if (match(TokenType::STRING)) {
         return std::make_shared<StringExpr>(previous().lexeme);
     }
     else if (match(TokenType::IDENTIFIER)) {
-        return std::make_shared<VariableExpr>(token.lexeme);
+        std::string name = previous().lexeme;
+
+        // Check for function call
+        if (match(TokenType::LEFT_PAREN)) {
+            consume(TokenType::RIGHT_PAREN, "Expected ')' after function call.");
+            return std::make_shared<CallExpr>(name);
+        }
+
+        return std::make_shared<VariableExpr>(name);
     }
     else if (match(TokenType::LEFT_PAREN)) {
         ExprPtr expr = expression();
@@ -109,6 +121,24 @@ ExprPtr Parser::factor() {
 
     throw std::runtime_error("Invalid expression.");
 }
+
+StmtPtr Parser::funcStatement() {
+    consume(TokenType::IDENTIFIER, "Expected function name.");
+    std::string name = previous().lexeme;
+
+    consume(TokenType::LEFT_PAREN, "Expected '(' after function name.");
+    consume(TokenType::RIGHT_PAREN, "Expected ')' after parameters.");
+    consume(TokenType::LEFT_BRACE, "Expected '{' before function body.");
+
+    std::vector<StmtPtr> body;
+
+    while (!match(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        body.push_back(statement());
+    }
+
+    return std::make_shared<FuncStmt>(name, body);
+}
+
 
 std::vector<StmtPtr> Parser::parse() {
     std::vector<StmtPtr> stmts;
