@@ -1,0 +1,121 @@
+#include "lexer.hpp"
+#include <cctype>
+#include <unordered_map>
+
+
+Lexer::Lexer(const std::string& src) : source(src) {}
+
+bool Lexer::isAtEnd() {
+    return current >= source.length();
+}
+
+char Lexer::advance() {
+    return source[current++];
+}
+
+char Lexer::peek() {
+    return isAtEnd() ? '\0' : source[current];
+}
+
+char Lexer::peekNext() {
+    return (current + 1 < source.length()) ? source[current + 1] : '\0';
+}
+
+bool Lexer::match(char expected) {
+    if (isAtEnd() || source[current] != expected) return false;
+    current++;
+    return true;
+}
+
+void Lexer::addToken(TokenType type) {
+    std::string text = source.substr(start, current - start);
+    tokens.emplace_back(type, text, line);
+}
+
+void Lexer::addToken(TokenType type, const std::string& text) {
+    tokens.emplace_back(type, text, line);
+}
+
+TokenType Lexer::checkKeyword(const std::string& word) {
+    static std::unordered_map<std::string, TokenType> keywords = {
+        {"let", TokenType::LET},
+        {"function", TokenType::FUNCTION},
+        {"return", TokenType::RETURN},
+        {"print", TokenType::PRINT},
+        {"true", TokenType::TRUE},
+        {"false", TokenType::FALSE},
+    };
+
+    auto it = keywords.find(word);
+    return it != keywords.end() ? it->second : TokenType::IDENTIFIER;
+}
+
+void Lexer::identifier() {
+    while (isalnum(peek()) || peek() == '_') advance();
+    std::string text = source.substr(start, current - start);
+    addToken(checkKeyword(text));
+}
+
+void Lexer::number() {
+    while (isdigit(peek())) advance();
+    addToken(TokenType::NUMBER);
+}
+
+void Lexer::string() {
+    while (peek() != '"' && !isAtEnd()) {
+        if (peek() == '\n') line++;
+        advance();
+    }
+
+    if (isAtEnd()) return;
+
+    advance(); // closing quote
+    std::string value = source.substr(start + 1, current - start - 2);
+    addToken(TokenType::STRING, value);
+}
+
+void Lexer::scanToken() {
+    char c = advance();
+    switch (c) {
+    case '(': addToken(TokenType::LEFT_PAREN); break;
+    case ')': addToken(TokenType::RIGHT_PAREN); break;
+    case '{': addToken(TokenType::LEFT_BRACE); break;
+    case '}': addToken(TokenType::RIGHT_BRACE); break;
+    case ';': addToken(TokenType::SEMICOLON); break;
+    case ',': addToken(TokenType::COMMA); break;
+    case '+': addToken(TokenType::PLUS); break;
+    case '-': addToken(TokenType::MINUS); break;
+    case '*': addToken(TokenType::STAR); break;
+    case '/': addToken(TokenType::SLASH); break;
+    case '=': addToken(TokenType::EQUAL); break;
+    case '"': string(); break;
+    case ' ':
+    case '\r':
+    case '\t':
+        break;
+    case '\n':
+        line++;
+        break;
+    default:
+        if (isdigit(c)) {
+            number();
+        }
+        else if (isalpha(c) || c == '_') {
+            identifier();
+        }
+        else {
+            addToken(TokenType::UNKNOWN);
+        }
+        break;
+    }
+}
+
+std::vector<Token> Lexer::tokenize() {
+    while (!isAtEnd()) {
+        start = current;
+        scanToken();
+    }
+
+    tokens.emplace_back(TokenType::END_OF_FILE, "", line);
+    return tokens;
+}
