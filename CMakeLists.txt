@@ -9,10 +9,10 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("EchoScript")
+project ("EScript")
 
 # Add source to this project's executable.
-add_executable (EchoScript 
+add_executable (EScript 
 "src/EchoScript/main.cpp"
 "src/EchoScript/main.hpp"
 "src/EchoScript/token.hpp"
@@ -21,7 +21,7 @@ add_executable (EchoScript
  "src/EchoScript/parser.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET EchoScript PROPERTY CXX_STANDARD 20)
+  set_property(TARGET EScript PROPERTY CXX_STANDARD 20)
 endif()
 
 # TODO: Add tests and install targets if needed.

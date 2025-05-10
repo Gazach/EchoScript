@@ -57,15 +57,47 @@ StmtPtr Parser::printStatement() {
 }
 
 ExprPtr Parser::expression() {
+    ExprPtr left = term();
+
+    while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
+        char op = previous().lexeme[0];
+        ExprPtr right = term();
+        left = std::make_shared<BinaryExpr>(left, op, right);
+    }
+
+    return left;
+}
+
+ExprPtr Parser::term() {
+    ExprPtr left = factor();
+
+    while (match(TokenType::STAR) || match(TokenType::SLASH)) {
+        char op = previous().lexeme[0];
+        ExprPtr right = factor();
+        left = std::make_shared<BinaryExpr>(left, op, right);
+    }
+
+    return left;
+}
+
+ExprPtr Parser::factor() {
     Token token = peek();
+
     if (match(TokenType::NUMBER)) {
         return std::make_shared<LiteralExpr>(std::stoi(token.lexeme));
     }
     else if (match(TokenType::IDENTIFIER)) {
         return std::make_shared<VariableExpr>(token.lexeme);
     }
+    else if (match(TokenType::LEFT_PAREN)) {
+        ExprPtr expr = expression();
+        consume(TokenType::RIGHT_PAREN, "Expected ')'.");
+        return expr;
+    }
+
     throw std::runtime_error("Invalid expression.");
 }
+
 
 std::vector<StmtPtr> Parser::parse() {
     std::vector<StmtPtr> stmts;

@@ -32,7 +32,6 @@ struct VariableExpr : Expression {
     }
 };
 
-
 struct LiteralExpr : Expression {
     int value;
     LiteralExpr(int val) : value(val) {}
@@ -55,5 +54,31 @@ struct PrintStmt : Statement {
     PrintStmt(ExprPtr expr) : expr(expr) {}
     void execute(std::unordered_map<std::string, int>& env) override {
         std::cout << expr->evaluate(env) << std::endl;
+    }
+};
+
+struct BinaryExpr : Expression {
+    ExprPtr left;
+    char op;
+    ExprPtr right;
+
+    BinaryExpr(ExprPtr left, char op, ExprPtr right)
+        : left(left), op(op), right(right) {
+    }
+
+    int evaluate(std::unordered_map<std::string, int>& env) override {
+        int lhs = left->evaluate(env);
+        int rhs = right->evaluate(env);
+
+        switch (op) {
+        case '+': return lhs + rhs;
+        case '-': return lhs - rhs;
+        case '*': return lhs * rhs;
+        case '/':
+            if (rhs == 0) throw std::runtime_error("Division by zero.");
+            return lhs / rhs;
+        default:
+            throw std::runtime_error("Unknown binary operator.");
+        }
     }
 };

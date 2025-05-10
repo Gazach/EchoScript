@@ -22,4 +22,7 @@ private:
     StmtPtr letStatement();
     StmtPtr printStatement();
     ExprPtr expression();
+    ExprPtr term();
+    ExprPtr factor();
+
 };
