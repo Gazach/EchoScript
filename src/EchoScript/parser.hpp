@@ -18,7 +18,7 @@ private:
     bool match(TokenType type);
     const Token& consume(TokenType type, const std::string& message);
 
-
+    bool check(TokenType type);
 
     // Statement parsing functions
     StmtPtr statement();

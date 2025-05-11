@@ -28,6 +28,12 @@ bool Parser::match(TokenType type) {
     return false;
 }
 
+bool Parser::check(TokenType type) {
+    // Don't run off the end
+    if (isAtEnd()) return false;
+    return peek().type == type;
+}
+
 const Token& Parser::consume(TokenType type, const std::string& message) {
     if (peek().type != type)
         throw std::runtime_error("Parser error: " + message);
@@ -106,14 +112,28 @@ ExprPtr Parser::factor() {
     else if (match(TokenType::IDENTIFIER)) {
         std::string name = previous().lexeme;
 
-        // Check for function call
+        // Did the user type '(' immediately after the identifier?
         if (match(TokenType::LEFT_PAREN)) {
-            consume(TokenType::RIGHT_PAREN, "Expected ')' after function call.");
-            return std::make_shared<CallExpr>(name);
+            std::vector<ExprPtr> args;
+
+            // If the next token isn’t ')', we have at least one argument
+            if (!check(TokenType::RIGHT_PAREN)) {
+                do {
+                    args.push_back(expression());
+                } while (match(TokenType::COMMA));
+            }
+
+            // Now we must close the call
+            consume(TokenType::RIGHT_PAREN, "Expected ')' after arguments.");
+
+            // Return a CallExpr carrying name + the args vector
+            return std::make_shared<CallExpr>(name, args);
         }
 
+        // Otherwise it’s just a variable
         return std::make_shared<VariableExpr>(name);
     }
+
     else if (match(TokenType::LEFT_PAREN)) {
         ExprPtr expr = expression();
         consume(TokenType::RIGHT_PAREN, "Expected ')'.");
@@ -124,21 +144,29 @@ ExprPtr Parser::factor() {
 }
 
 StmtPtr Parser::funcStatement() {
-    consume(TokenType::IDENTIFIER, "Expected function name.");
-    std::string name = previous().lexeme;
+    // we’ve already matched TokenType::FUNC
+    Token nameTok = consume(TokenType::IDENTIFIER, "Expected function name.");
+    std::string name = nameTok.lexeme;
 
     consume(TokenType::LEFT_PAREN, "Expected '(' after function name.");
+    std::vector<std::string> params;
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            Token param = consume(TokenType::IDENTIFIER, "Expected parameter name.");
+            params.push_back(param.lexeme);
+        } while (match(TokenType::COMMA));
+    }
     consume(TokenType::RIGHT_PAREN, "Expected ')' after parameters.");
+
     consume(TokenType::LEFT_BRACE, "Expected '{' before function body.");
-
     std::vector<StmtPtr> body;
-
     while (!match(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         body.push_back(statement());
     }
 
-    return std::make_shared<FuncStmt>(name, body);
+    return std::make_shared<FuncStmt>(name, params, body);
 }
+
 
 StmtPtr Parser::returnStatement() {
     ExprPtr value = expression();

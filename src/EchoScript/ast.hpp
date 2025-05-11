@@ -157,61 +157,70 @@ struct StringExpr : Expression {
 
 struct FuncStmt : Statement {
     std::string name;
+    std::vector<std::string> params;   // ← new
     std::vector<StmtPtr> body;
 
-    FuncStmt(const std::string& name, const std::vector<StmtPtr>& body)
-        : name(name), body(body) {}
-
-    // Corrected `execute` method to match the base class signature
-    void execute(std::unordered_map<std::string, Value>& env,
-                 std::unordered_map<std::string, FuncStmt*>& funcs) override {
-        funcs[name] = this;  // Store FuncStmt* directly in funcs
+    FuncStmt(const std::string& name,
+        const std::vector<std::string>& params,     // ← new
+        const std::vector<StmtPtr>& body)
+        : name(name), params(params), body(body) {
     }
 
-    Value call(std::unordered_map<std::string, Value>& env,
-               std::unordered_map<std::string, FuncStmt*>& funcs) {
-        std::unordered_map<std::string, Value> localEnv = env;
+    void execute(std::unordered_map<std::string, Value>& env,
+        std::unordered_map<std::string, FuncStmt*>& funcs) override {
+        funcs[name] = this;
+    }
 
+    Value call(auto& env, auto& funcs, const std::vector<Value>& args) {
+        // 1) Setup local scope
+        std::unordered_map<std::string, Value> localEnv = env;
+        // 2) Bind parameters
+        for (size_t i = 0; i < params.size(); ++i) {
+            localEnv[params[i]] = args.at(i);
+        }
+        // 3) Execute body, catching returns
         try {
-            for (auto& stmt : body) {  // Use the body stored in funcs
-                stmt->execute(localEnv, funcs);  // Execute each statement in the body
+            for (auto& stmt : body) {
+                stmt->execute(localEnv, funcs);
             }
         }
-        catch (const Value& returnVal) {
-            return returnVal;  // Return value from function (or exit early)
+        catch (const ReturnException& ret) {
+            return ret.value;
         }
-
-        return Value();  // Default return value (for now, could be void)
+        return Value();  // default
     }
 };
+
 
     
 
 // Function Call Expression (e.g., greet())
 struct CallExpr : Expression {
     std::string name;
+    std::vector<ExprPtr> arguments;  // ← new
 
-    CallExpr(const std::string& name) : name(name) {}
+    CallExpr(const std::string& name,
+        const std::vector<ExprPtr>& arguments)
+        : name(name), arguments(arguments) {
+    }
 
     Value evaluate(std::unordered_map<std::string, Value>& env,
         std::unordered_map<std::string, FuncStmt*>& funcs) override {
         auto it = funcs.find(name);
-        if (it == funcs.end()) throw std::runtime_error("Function not defined: " + name);
+        if (it == funcs.end())
+            throw std::runtime_error("Function not defined: " + name);
 
-        // Get the function definition (FuncStmt*)
-        FuncStmt* func = it->second;
+        // Evaluate each argument
+        std::vector<Value> args;
+        for (auto& expr : arguments) {
+            args.push_back(expr->evaluate(env, funcs));
+        }
 
-        // Try executing the function and handle the return exception
-        try {
-            // Call the function with the current environment and functions map
-            return func->call(env, funcs);
-        }
-        catch (const ReturnException& ret) {
-            // Catch the return exception and return the value from the function
-            return ret.value;  // This will be the value returned by the function
-        }
+        // Call with those args
+        return it->second->call(env, funcs, args);
     }
 };
+
 
 
 struct ReturnStmt : public Statement {
