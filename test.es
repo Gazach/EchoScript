@@ -1,16 +1,25 @@
-println("Ini test untuk return :");
-
-let test = "ini test";
+let test = 132131 - 234141;
 
 println(test);
 
-func dizznut(){
-    let a = 1;
-    let b = 2;
-    return a + b;
+func hello(adds){
+    let letmenow = 100 + adds;
+    return letmenow;
 }
 
-let z = dizznut();
+let z = hello(50);
 
 println(z);
 
+func helloprint(){
+    println("printing!");
+}
+
+helloprint();
+
+func testingfalse(){
+    let letmenow = false;
+    return letmenow;
+}
+
+print(testingfalse());

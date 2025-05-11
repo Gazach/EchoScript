@@ -99,6 +99,9 @@ void Lexer::scanToken() {
             addToken(TokenType::UNKNOWN); // Or handle as syntax error
         }
         break;
+    case '\'':
+        charLiteral();
+        break;
     case ' ':
     case '\r':
     case '\t':
@@ -145,4 +148,29 @@ std::vector<Token> Lexer::tokenize() {
 
     tokens.emplace_back(TokenType::END_OF_FILE, "", line);
     return tokens;
+}
+
+
+void Lexer::charLiteral() {
+    advance(); // Skip opening '
+    start = current;
+
+    // Handle double '' escape
+    if (peek() == '\'') {
+        advance(); // Skip first '
+        if (peek() != '\'') {
+            throw std::runtime_error("Invalid empty character literal");
+        }
+        addToken(TokenType::CHAR, "'"); // Store single quote
+        advance(); // Skip second '
+    }
+    else {
+        char value = advance();
+        addToken(TokenType::CHAR, std::string(1, value));
+    }
+
+    // Consume closing '
+    if (advance() != '\'') {
+        throw std::runtime_error("Unterminated character literal");
+    }
 }

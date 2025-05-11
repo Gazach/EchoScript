@@ -20,6 +20,7 @@ enum class TokenType
 	IDENTIFIER, 
 	NUMBER, 
 	STRING,
+	CHAR,
 
 	// Keywords
 	LET, 

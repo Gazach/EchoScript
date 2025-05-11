@@ -79,7 +79,15 @@ struct LetStmt : Statement {
 
     void execute(std::unordered_map<std::string, Value>& env,
         std::unordered_map<std::string, FuncStmt*>& funcs) override {
-        env[name] = value->evaluate(env, funcs);  // Fixed: include both env and funcs
+        Value evaluated = value->evaluate(env, funcs);
+
+        // Handle character type explicitly
+        if (evaluated.isChar()) {
+            env[name] = Value(evaluated.asChar());
+        }
+        else {
+            env[name] = evaluated;
+        }
     }
 
 };
@@ -125,23 +133,34 @@ struct BinaryExpr : Expression {
         Value lhs = left->evaluate(env, funcs);
         Value rhs = right->evaluate(env, funcs);
 
-        if (std::holds_alternative<std::string>(lhs.data) || std::holds_alternative<std::string>(rhs.data)) {
-            return Value(lhs.toString() + rhs.toString());  
+        // Handle string concatenation first
+        if (std::holds_alternative<std::string>(lhs.data) ||
+            std::holds_alternative<std::string>(rhs.data)) {
+            return Value(lhs.toString() + rhs.toString());
         }
 
-        int l = lhs.asInt();
-        int r = rhs.asInt();
+        // Handle numeric operations (including chars and booleans)
+        try {
+            int l = lhs.asNumber();
+            int r = rhs.asNumber();
 
-        switch (op) {
-        case '+': return Value(l + r);
-        case '-': return Value(l - r);
-        case '*': return Value(l * r);
-        case '/': return Value(l / r);
-        default: throw std::runtime_error("Unknown operator.");
+            switch (op) {
+            case '+': return Value(l + r);
+            case '-': return Value(l - r);
+            case '*': return Value(l * r);
+            case '/': {
+                if (r == 0) throw std::runtime_error("Division by zero");
+                return Value(l / r);
+            }
+            default: throw std::runtime_error("Unknown operator");
+            }
+        }
+        catch (const std::runtime_error& e) {
+            // Handle type mismatch errors
+            throw std::runtime_error(std::string("Type error in operation: ") + e.what());
         }
     }
 };
-
 
 // String expression
 struct StringExpr : Expression {
@@ -191,9 +210,6 @@ struct FuncStmt : Statement {
     }
 };
 
-
-    
-
 // Function Call Expression (e.g., greet())
 struct CallExpr : Expression {
     std::string name;
@@ -221,8 +237,6 @@ struct CallExpr : Expression {
     }
 };
 
-
-
 struct ReturnStmt : public Statement {
     ExprPtr expr;
 
@@ -234,5 +248,30 @@ struct ReturnStmt : public Statement {
         Value result = expr->evaluate(env, funcs);
         // Throw the custom return exception with the result
         throw ReturnException(result);
+    }
+};
+
+// Boolean expression
+struct BooleanExpr : Expression {
+    bool value;
+
+    BooleanExpr(bool val) : value(val) {}
+
+    Value evaluate(std::unordered_map<std::string, Value>& env,
+        std::unordered_map<std::string, FuncStmt*>& funcs)  override {
+        return Value(value);
+    }
+};
+
+// Character expression
+struct CharExpr : Expression {
+    char value;
+
+    explicit CharExpr(char c) : value(c) {}
+
+    Value evaluate(std::unordered_map<std::string, Value>& env,
+        std::unordered_map<std::string, FuncStmt*>& funcs) override {
+        // Should store as char in Value
+        return Value(value);
     }
 };

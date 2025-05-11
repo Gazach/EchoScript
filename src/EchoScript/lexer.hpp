@@ -24,6 +24,7 @@ private:
     void identifier();
     void number();
     void string();
+    void charLiteral();
     bool match(char expected);
     TokenType checkKeyword(const std::string& word);
     void scanString();

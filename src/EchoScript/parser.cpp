@@ -103,6 +103,16 @@ ExprPtr Parser::term() {
 }
 
 ExprPtr Parser::factor() {
+    if (match(TokenType::TRUE)) {
+        return std::make_shared<BooleanExpr>(true);
+    }
+    if (match(TokenType::FALSE)) {
+        return std::make_shared<BooleanExpr>(false);
+    }
+    if (match(TokenType::CHAR)) {
+        std::string charVal = previous().lexeme;
+        return std::make_shared<CharExpr>(charVal[0]);
+    }
     if (match(TokenType::NUMBER)) {
         return std::make_shared<LiteralExpr>(std::stoi(previous().lexeme));
     }
