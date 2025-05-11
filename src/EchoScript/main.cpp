@@ -5,6 +5,13 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <iostream>
+#include <string>
+
+bool has_es_extension(const std::string& filename) {
+    // Check if the file ends with ".es"
+    return filename.size() > 3 && filename.substr(filename.size() - 3) == ".es";
+}
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -12,7 +19,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ifstream file(argv[1]);
+    std::string filename = argv[1];
+
+    // Check if the file has a .es extension
+    if (!has_es_extension(filename)) {
+        std::cerr << "EchoScript Error: The file must have a .es extension.\n";
+        return 1;
+    }
+
+    std::ifstream file(filename);
     if (!file) {
         std::cerr << "Failed to open file.\n";
         return 1;
@@ -31,7 +46,6 @@ int main(int argc, char* argv[]) {
 
     std::unordered_map<std::string, Value> env;
     std::unordered_map<std::string, FuncStmt*> funcs;
-
 
     // Execute each statement
     for (const auto& stmt : statements) {

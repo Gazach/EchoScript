@@ -150,7 +150,7 @@ std::vector<Token> Lexer::tokenize() {
     return tokens;
 }
 
-
+// In lexer.cpp - Check charLiteral()
 void Lexer::charLiteral() {
     advance(); // Skip opening '
     start = current;
@@ -163,8 +163,7 @@ void Lexer::charLiteral() {
         }
         addToken(TokenType::CHAR, "'"); // Store single quote
         advance(); // Skip second '
-    }
-    else {
+    } else {
         char value = advance();
         addToken(TokenType::CHAR, std::string(1, value));
     }

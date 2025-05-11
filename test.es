@@ -1,25 +1,30 @@
-let test = 132131 - 234141;
+## ini komen
+println("Teks ini berasal dari EchoScript!");
 
-println(test);
+let a = 1000; ## tes variable tipe data int
+let b = 200;
 
-func hello(adds){
-    let letmenow = 100 + adds;
-    return letmenow;
+func tambah(a, b){ ## tes penjumlahan
+    return a + b;
 }
-
-let z = hello(50);
-
-println(z);
-
-func helloprint(){
-    println("printing!");
+func kurang(a, b){ ## tes pengurangan
+    return a - b;
 }
-
-helloprint();
-
-func testingfalse(){
-    let letmenow = false;
-    return letmenow;
+func bagi(a, b){ ## tes pembagian
+    return a / b;
 }
+func kali(a, b){ ## tes perkalian
+    return a * b;
+}
+## output dari function
+println(tambah(a, b)); 
+println(kurang(a, b));
+println(bagi(a, b));
+println(kali(a, b));
 
-print(testingfalse());
+let printdaristring = "teks ini langsung dari string!"; ## tes variable tipe data string
+
+println(printdaristring); ## print dari string
+
+let databool = false; ## tes variable tipe data boolean
+println("databool adalah : "+databool);
