@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "ast.hpp" 
 #include <stdexcept>
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
@@ -113,8 +114,13 @@ ExprPtr Parser::factor() {
         std::string charVal = previous().lexeme;
         return std::make_shared<CharExpr>(charVal[0]);
     }
+    if (match(TokenType::FLOAT)) {
+        double d = std::stod(previous().lexeme);
+        return std::make_shared<LiteralExpr>(Value(d));
+    }
     if (match(TokenType::NUMBER)) {
-        return std::make_shared<LiteralExpr>(std::stoi(previous().lexeme));
+        int i = std::stoi(previous().lexeme);
+        return std::make_shared<LiteralExpr>(Value(i));
     }
     else if (match(TokenType::STRING)) {
         return std::make_shared<StringExpr>(previous().lexeme);

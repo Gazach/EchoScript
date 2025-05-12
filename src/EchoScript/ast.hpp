@@ -60,8 +60,10 @@ struct VariableExpr : Expression {
 
 // Literal Expression (e.g., 42)
 struct LiteralExpr : Expression {
-    int value;
+    Value value;
+    explicit LiteralExpr(const Value& val) : value(val) {}
     LiteralExpr(int val) : value(val) {}
+    LiteralExpr(double d) : value(d) {}
 
     Value evaluate(std::unordered_map<std::string, Value>& env,
         std::unordered_map<std::string, FuncStmt*>& funcs) override {
@@ -133,33 +135,80 @@ struct BinaryExpr : Expression {
         Value lhs = left->evaluate(env, funcs);
         Value rhs = right->evaluate(env, funcs);
 
-        // Handle string concatenation first
+        // Handle string concatenation
         if (std::holds_alternative<std::string>(lhs.data) ||
             std::holds_alternative<std::string>(rhs.data)) {
             return Value(lhs.toString() + rhs.toString());
         }
 
-        // Handle numeric operations (including chars and booleans)
-        try {
-            int l = lhs.asNumber();
-            int r = rhs.asNumber();
+        // Convert both values to numeric representations
+        auto [l_num, l_is_int] = convertToNumeric(lhs);
+        auto [r_num, r_is_int] = convertToNumeric(rhs);
 
-            switch (op) {
-            case '+': return Value(l + r);
-            case '-': return Value(l - r);
-            case '*': return Value(l * r);
-            case '/': {
-                if (r == 0) throw std::runtime_error("Division by zero");
-                return Value(l / r);
-            }
-            default: throw std::runtime_error("Unknown operator");
-            }
-        }
-        catch (const std::runtime_error& e) {
-            // Handle type mismatch errors
-            throw std::runtime_error(std::string("Type error in operation: ") + e.what());
+        // Perform numeric operations
+        switch (op) {
+        case '+': return handleAddition(l_num, l_is_int, r_num, r_is_int);
+        case '-': return handleSubtraction(l_num, l_is_int, r_num, r_is_int);
+        case '*': return handleMultiplication(l_num, l_is_int, r_num, r_is_int);
+        case '/': return handleDivision(l_num, l_is_int, r_num, r_is_int);
+        default: throw std::runtime_error("Unknown operator");
         }
     }
+
+private:
+    enum class NumType { INT, FLOAT };
+
+    std::pair<double, NumType> convertToNumeric(const Value& v) {
+        if (std::holds_alternative<bool>(v.data)) {
+            return { std::get<bool>(v.data) ? 1.0 : 0.0, NumType::INT };
+        }
+        if (std::holds_alternative<char>(v.data)) {
+            return { static_cast<double>(std::get<char>(v.data)), NumType::INT };
+        }
+        if (std::holds_alternative<int>(v.data)) {
+            return { static_cast<double>(std::get<int>(v.data)), NumType::INT };
+        }
+        if (std::holds_alternative<double>(v.data)) {
+            return { std::get<double>(v.data), NumType::FLOAT };
+        }
+        throw std::runtime_error("Invalid operand type for arithmetic operation");
+    }
+
+    Value handleAddition(double l, NumType l_type, double r, NumType r_type) {
+        if (l_type == NumType::INT && r_type == NumType::INT) {
+            return Value(static_cast<int>(l) + static_cast<int>(r));
+        }
+        return Value(l + r);
+    }
+
+    Value handleSubtraction(double l, NumType l_type, double r, NumType r_type) {
+        if (l_type == NumType::INT && r_type == NumType::INT) {
+            return Value(static_cast<int>(l) - static_cast<int>(r));
+        }
+        return Value(l - r);
+    }
+
+    Value handleMultiplication(double l, NumType l_type, double r, NumType r_type) {
+        if (l_type == NumType::INT && r_type == NumType::INT) {
+            return Value(static_cast<int>(l) * static_cast<int>(r));
+        }
+        return Value(l * r);
+    }
+
+    Value handleDivision(double l, NumType l_type,
+        double r, NumType r_type) {
+        if (r == 0) throw std::runtime_error("Division by zero");
+        double result = l / r;
+
+        // If both inputs were INT and the result is an integer, return as int
+        if (l_type == NumType::INT && r_type == NumType::INT &&
+            std::floor(result) == result) {
+            return Value(static_cast<int>(result));
+        }
+        // Otherwise return as float (you may need to add a double variant to Value)
+        return Value(result);
+    }
+
 };
 
 // String expression

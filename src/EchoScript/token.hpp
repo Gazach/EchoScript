@@ -21,6 +21,7 @@ enum class TokenType
 	NUMBER, 
 	STRING,
 	CHAR,
+	FLOAT,
 
 	// Keywords
 	LET, 

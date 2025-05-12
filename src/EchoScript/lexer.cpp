@@ -58,9 +58,26 @@ void Lexer::identifier() {
 }
 
 void Lexer::number() {
+    // 1) integer part
     while (isdigit(peek())) advance();
-    addToken(TokenType::NUMBER);
+
+    // 2) optional fraction
+    bool isFloat = false;
+    if (peek() == '.' && isdigit(peekNext())) {
+        isFloat = true;
+        advance();            // consume '.'
+        while (isdigit(peek())) advance();
+    }
+
+    // 3) extract text
+    std::string text = source.substr(start, current - start);
+
+    // 4) emit token with lexeme
+    if (isFloat) addToken(TokenType::FLOAT, text);
+    else         addToken(TokenType::NUMBER, text);
 }
+
+
 
 void Lexer::string() {
     while (peek() != '"' && !isAtEnd()) {
