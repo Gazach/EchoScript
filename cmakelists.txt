@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 4.0.0)
+project(EchoScript LANGUAGES CXX)
+
+# Use C++20
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Use Clang by default
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(FATAL_ERROR "This project is meant to be compiled with Clang.")
+endif()
+
+# Add the executable
+add_executable(EchoScript
+    src/test.cpp
+)
