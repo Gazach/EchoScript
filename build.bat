@@ -7,7 +7,7 @@ if "%1"=="" (
     goto end
 )
 
-REM Path to Clang (adjust if needed)
+REM Path to Clang (consider to change this path to your own LLVM path if its wrong)
 set CLANG_PATH=C:\Program Files\LLVM\bin
 
 REM Normalize input
