@@ -1,4 +1,7 @@
 NOTE!!!!!
 
 This code is make in :
+
 Clang/LLVM version 20.1.0
+Ninja version 1.12.1
+Cmake version 4.0.2
