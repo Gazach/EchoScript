@@ -1,6 +1,6 @@
 #include <iostream>
 #include "lexer/lexer.hpp"
-#include "lexer/token_utils.hpp"
+#include "lexer/token_recognition.hpp"
 
 int main() {
     std::string code = R"(
