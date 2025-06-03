@@ -1,6 +1,6 @@
+// Code for all tokens
 #pragma once
 #include <string>
-
 
 enum class TokenType {
     // KEYWORD

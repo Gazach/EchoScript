@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <cctype> // for isspace
+#include <cctype>
 
 class scanner {
 public:

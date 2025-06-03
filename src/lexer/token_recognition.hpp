@@ -1,3 +1,4 @@
+/*This code is to recognize the token input and return what token is it*/
 #pragma once
 #include "token.hpp"
 
