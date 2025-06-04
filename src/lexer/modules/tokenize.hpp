@@ -14,8 +14,8 @@ inline std::vector<Token> tokenize(const std::string& input) {
 
         if (std::isalpha(ch)) {
             std::string ident = cursor.readWhile([](char c) { return std::isalnum(c) || c == '_'; });
-            if (ident == "let") tokens.emplace_back(TokenType::LET);
-            else if (ident == "print") tokens.emplace_back(TokenType::PRINT);
+            if (ident == "let") tokens.emplace_back(TokenType::LET, ident);
+            else if (ident == "print") tokens.emplace_back(TokenType::PRINT, ident);
             else tokens.emplace_back(TokenType::IDENTIFIER, ident);
         }
         else if (std::isdigit(ch)) {
@@ -27,15 +27,16 @@ inline std::vector<Token> tokenize(const std::string& input) {
 
         else {
             switch (ch) {
-                case '=': tokens.emplace_back(TokenType::EQUAL); break;
-                case '+': tokens.emplace_back(TokenType::PLUS); break;
-                case '-': tokens.emplace_back(TokenType::MINUS); break;
-                case '*': tokens.emplace_back(TokenType::STAR); break;
-                case '/': tokens.emplace_back(TokenType::SLASH); break;
-                case '(': tokens.emplace_back(TokenType::LPAREN); break;
-                case ')': tokens.emplace_back(TokenType::RPAREN); break;
-                case ';': tokens.emplace_back(TokenType::SEMICOLON); break;
-                default: tokens.emplace_back(TokenType::UNKNOWN, std::string(1, ch)); break;
+                case '+': tokens.emplace_back(TokenType::PLUS, "+"); cursor.advance(); break;
+                case '-': tokens.emplace_back(TokenType::MINUS, "-"); cursor.advance(); break;
+                case '*': tokens.emplace_back(TokenType::STAR, "*"); cursor.advance(); break;
+                case '/': tokens.emplace_back(TokenType::SLASH, "/"); cursor.advance(); break;
+                case '=': tokens.emplace_back(TokenType::EQUAL, "="); cursor.advance(); break;
+                case ';': tokens.emplace_back(TokenType::SEMICOLON, ";"); cursor.advance(); break;
+                case '(': tokens.emplace_back(TokenType::LPAREN, "("); cursor.advance(); break;
+                case ')': tokens.emplace_back(TokenType::RPAREN, ")"); cursor.advance(); break;
+                case '\0': tokens.emplace_back(TokenType::END_OF_FILE, ""); break;
+                default: tokens.emplace_back(TokenType::UNKNOWN, std::string(1, ch)); cursor.advance(); break;
             }
             cursor.advance();
         }
