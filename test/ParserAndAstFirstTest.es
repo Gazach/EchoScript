@@ -1,0 +1,13 @@
+let x = 5;
+let t = 5;
+let e = 5;
+let g = 5;
+let x = 5;
+let t = 5;
+let e = 5;
+let g = 5;
+let x = 5;
+let t = 5;
+let e = 5;
+let g = 5;
+print x;
