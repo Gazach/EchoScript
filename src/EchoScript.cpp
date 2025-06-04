@@ -21,7 +21,7 @@ std::string readFile(const std::string& filename) {
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cerr << "Usage: ./eslang <source>.es\n";
+        std::cerr << "Usage: ./echoscript <source>.es\n";
         return 1;
     }
 
