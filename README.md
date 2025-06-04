@@ -1,6 +1,6 @@
 # EchoScript
 <div align="center">
-  <img src="Logo.png"width="200" height="200">
+  <img src="logo.png"width="200" height="200">
 </div>
 
 #
