@@ -11,5 +11,5 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC
 endif()
 
 # Add the executable
-add_executable(EchoScript "src/EchoScript.cpp" "src/EchoScript.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/extra/icon.rc"
+add_executable(EchoScript "src/EchoScript.cpp" "src/EchoScript.hpp" "src/interpreter/evaluator.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/extra/icon.rc"
 )

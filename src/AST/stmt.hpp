@@ -7,6 +7,8 @@ struct Stmt {
     virtual ~Stmt() = default;
 };
 
+using StmtPtr = std::unique_ptr<Stmt>;
+
 struct LetStmt : public Stmt {
     std::string name;
     std::unique_ptr<Expr> value;

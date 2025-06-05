@@ -7,6 +7,7 @@
 #include "lexer/lexer.hpp"    // umbrella header containing Scanner and tokenize
 #include "lexer/token_recognition.hpp"    // for tokenTypeToString
 #include "parser/parser.hpp"  // parser that builds AST
+#include "interpreter/evaluator.hpp"
 
 // Helper: read entire file into string
 std::string readFile(const std::string& filename) {
@@ -52,6 +53,10 @@ int main(int argc, char** argv) {
         auto statements = parser.parse();
 
         std::cout << "Parsed " << statements.size() << " statement(s).\n";
+
+        // Interpret
+        Environment env;
+        evaluate(statements, env);
 
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
