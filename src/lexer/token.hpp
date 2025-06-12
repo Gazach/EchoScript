@@ -10,18 +10,19 @@ enum class TokenType {
     PRINT,
 
     // Math Operation
-    PLUS,
-    MINUS,
-    STAR,
-    SLASH,
+    PLUS,       // +
+    MINUS,      // -
+    STAR,       // *
+    SLASH,      // /
 
     // Single character
     EQUAL,
     SEMICOLON,
     LPAREN,
     RPAREN,
+    COMMENTS, // ##
 
-    // 
+    // Misc
     END_OF_FILE,
     UNKNOWN
 };

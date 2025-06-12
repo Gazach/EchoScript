@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cctype>
+#include <stdexcept>
 #include "../token.hpp"
 #include "helper.hpp"
 
@@ -35,6 +36,19 @@ inline std::vector<Token> tokenize(const std::string& input) {
                 case ';': tokens.emplace_back(TokenType::SEMICOLON, ";"); cursor.advance(); break;
                 case '(': tokens.emplace_back(TokenType::LPAREN, "("); cursor.advance(); break;
                 case ')': tokens.emplace_back(TokenType::RPAREN, ")"); cursor.advance(); break;
+                case '#':
+                    cursor.advance(); // Consume first '#'
+                    if (cursor.currentChar() == '#') {
+                        // It's a comment, skip until end of line
+                        while (cursor.currentChar() != '\n' && cursor.currentChar() != '\0') {
+                            cursor.advance();
+                        }
+                    } else {
+                        // Single '#' is invalid → syntax error
+                       throw std::runtime_error("Line " + std::to_string(cursor.getLine()) + ": Unexpected single '#' character. Did you mean '##' for a comment?");
+
+                    }
+                    break;
                 case '\0': tokens.emplace_back(TokenType::END_OF_FILE, ""); break;
                 default: tokens.emplace_back(TokenType::UNKNOWN, std::string(1, ch)); cursor.advance(); break;
             }

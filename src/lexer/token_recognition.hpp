@@ -16,6 +16,7 @@ inline std::string tokenTypeToString(TokenType type) {
       case TokenType::SEMICOLON:   return "SEMICOLON";
       case TokenType::LPAREN:      return "LPAREN";
       case TokenType::RPAREN:      return "RPAREN";
+      case TokenType::COMMENTS:    return "COMMENTS";
       case TokenType::END_OF_FILE: return "EOF";
       case TokenType::UNKNOWN:     return "UNKNOWN";
     }

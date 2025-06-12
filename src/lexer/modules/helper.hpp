@@ -5,14 +5,20 @@
 class scanner {
 public:
     scanner(const std::string& input)
-        : input(input), pos(0) {}
+        : input(input), pos(0), line(1){}
 
     char currentChar() const {
         return pos < input.size() ? input[pos] : '\0';
     }
 
     char advance() {
-        return pos < input.size() ? input[pos++] : '\0';
+        if (pos < input.size()) {
+            if (input[pos] == '\n') {
+                ++line;
+            }
+            return input[pos++];
+        }
+        return '\0';
     }
 
     void skipWhitespace() {
@@ -21,6 +27,10 @@ public:
 
     bool isEOF() const {
         return pos >= input.size();
+    }
+
+    int getLine() const {
+        return line;
     }
 
     size_t getPosition() const { return pos; }
@@ -37,4 +47,5 @@ public:
 private:
     std::string input;
     size_t pos;
+    int line;
 };
