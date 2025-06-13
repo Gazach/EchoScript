@@ -48,14 +48,17 @@ private:
         if (check(type)) {
             advance();
         } else {
-            throw std::runtime_error("Parse error: " + message);
+            const Token& tok = peek();
+            throw std::runtime_error("at Line " + std::to_string(tok.line) + ": " + message);
         }
     }
+
 
     std::unique_ptr<Stmt> parseStatement() {
         if (match(TokenType::LET)) return parseLetStatement();
         if (match(TokenType::PRINT)) return parsePrintStatement();
-        throw std::runtime_error("Unknown statement.");
+        const Token& tok = peek();
+        throw std::runtime_error("at Line " + std::to_string(tok.line) + ": Unknown statement");
     }
 
     std::unique_ptr<Stmt> parseLetStatement() {
@@ -93,6 +96,7 @@ private:
             return std::make_unique<IdentifierExpr>(previous().value);
         }
 
-        throw std::runtime_error("Expected expression.");
+        const Token& tok = peek();
+        throw std::runtime_error("at Line " + std::to_string(tok.line) + ": Expected expression");
     }
 };

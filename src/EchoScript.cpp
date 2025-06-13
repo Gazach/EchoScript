@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
         evaluate(statements, env);
 
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "\033[31mError \033[0m"/*Just make Error looks red LOL*/<< e.what() << std::endl;
         return 1;
     }
 

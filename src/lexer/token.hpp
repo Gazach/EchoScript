@@ -30,7 +30,7 @@ enum class TokenType {
 struct Token {
     TokenType type;
     std::string value;
-
-    Token(TokenType type, const std::string& value = "")
-        : type(type), value(value) {}
+    int line;
+    Token(TokenType type, const std::string& value, int line = 0)
+        : type(type), value(value), line(line) {}
 };
